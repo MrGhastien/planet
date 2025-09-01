@@ -25,7 +25,7 @@ static int lastx, lasty;
 
 float interp_factor = 0.5;
 
-#define GRAVITY 0.00006f
+#define GRAVITY 0.006f
 
 bool piloting = false;
 static long ship_idx;
@@ -191,10 +191,12 @@ static void draw_object(void* obj_ptr, long idx, void* data) {
 
     glBindVertexArray(obj->model.VAO);
     glDrawElements(GL_TRIANGLES, obj->model.mesh.index_count, GL_UNSIGNED_INT, NULL);
+
 }
 
 // TODO: Make shaders dynamic !
-static void use_gpu(const Camera* cam, RenderCtx* ctx, GLuint basic_program, GLuint grid_program) {
+static void use_gpu(const Camera* cam, RenderCtx* ctx, GLuint basic_program, GLuint grid_program, double deltatime) {
+    (void)deltatime;
     glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -218,9 +220,9 @@ static void use_gpu(const Camera* cam, RenderCtx* ctx, GLuint basic_program, GLu
     draw_grid(grid_program, ctx->grid_vao, proj_matrix, view_matrix, cam);
     glEnable(GL_CULL_FACE);
 
-    debug_draw();
+    debug_draw(&view_matrix, &proj_matrix);
     glfwSwapBuffers(ctx->window);
-};
+}
 
 typedef struct {
     long source_idx;
@@ -247,6 +249,7 @@ static void update_object_physics(void* obj_ptr, long idx, void* data) {
     (void) data;
     (void) idx;
     Object* obj = obj_ptr;
+    double deltatime = *(double*)data;
 
     /*
     if (idx == 0) {
@@ -257,13 +260,15 @@ static void update_object_physics(void* obj_ptr, long idx, void* data) {
     }
     */
 
+
     GravityInfo info = {
         .source = obj,
         .source_idx = idx,
     };
     pool_foreach(&objects, &object_gravity, &info);
 
-    physics_update(&obj->physics, &obj->model.transform, 1);
+    physics_update(&obj->physics, &obj->model.transform, deltatime);
+    debug_add_arrow(obj->model.transform.position, obj->physics.velocity);
 }
 
 static void update_camera(Camera* cam) {
@@ -306,7 +311,7 @@ static void update_camera(Camera* cam) {
     cam->actual_fov = lerp(cam->actual_fov, cam->fov, interp_factor);
 }
 
-void use_cpu(RenderCtx* render_ctx, Camera* cam) {
+void use_cpu(RenderCtx* render_ctx, Camera* cam, double deltatime) {
 
     processInput(render_ctx->window, cam);
 
@@ -319,7 +324,7 @@ void use_cpu(RenderCtx* render_ctx, Camera* cam) {
     physics_apply_force(&sphere_body, vec3_neg(force), VEC3_ZERO);
     */
 
-    pool_foreach(&objects, update_object_physics, NULL);
+    pool_foreach(&objects, update_object_physics, &deltatime);
 
     update_camera(cam);
 }
@@ -338,8 +343,6 @@ int main(void) {
 
     debug_init();
 
-
-
     GLuint basic_program;
     if (!shader_load("shaders/triangle.vsh", "shaders/triangle.fsh", &basic_program))
         return 1;
@@ -357,14 +360,19 @@ int main(void) {
 
     init_objects();
 
-    debug_add_arrow(VEC3_ZERO, (Vec3) {.y = 3, .z = 2, .x = -4});
+    double current_frame;
+    double last_frame = glfwGetTime();
 
     while (!glfwWindowShouldClose(render_ctx.window)) {
+        current_frame = glfwGetTime();
+        double deltatime = current_frame - last_frame;
 
-        use_cpu(&render_ctx, &cam);
-        use_gpu(&cam, &render_ctx, basic_program, grid_program);
+        //debug_add_arrow(VEC3_ZERO, (Vec3) {.x = 38, .y = 6, .z = -3});
+        use_cpu(&render_ctx, &cam, deltatime);
+        use_gpu(&cam, &render_ctx, basic_program, grid_program, deltatime);
 
         glfwPollEvents();
+        last_frame = current_frame;
     }
 
     glDeleteProgram(basic_program);
