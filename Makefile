@@ -7,10 +7,10 @@ export TEST_DIR := $(CURDIR)/test
 export LIBDIR := $(CURDIR)/libs
 
 export CC = gcc
-export CFLAGS = -Wall -Wextra -Wreturn-type -Werror -fsanitize=address
+export CFLAGS = -Wall -Wextra -Wreturn-type -Werror #-fsanitize=address
 export CPPFLAGS = -I$(SRC_DIR) -I$(LIBDIR)/glad/include
-export LDFLAGS = -L"$(LIBDIR)" -fsanitize=address
-export LDLIBS := -lglfw -lGL -ldl -lpthread -lwayland-client #-lX11 -lXrandr -lXi
+export LDFLAGS = -L"$(LIBDIR)" #-fsanitize=address
+export LDLIBS := -lglfw -lGL -ldl -lpthread -lwayland-client -lm #-lX11 -lXrandr -lXi
 
 MAIN_TARGET := planet
 

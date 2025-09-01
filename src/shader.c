@@ -117,3 +117,12 @@ void shader_set_uniform_float(GLuint program, const char* name, float value) {
 void shader_set_uniform_bool(GLuint program, const char* name, bool value) {
     glUniform1i(glGetUniformLocation(program, name), value ? 1 : 0);
 }
+void shader_set_uniform_mat4(GLuint program, const char* name, const Mat4* value) {
+    glUniformMatrix4fv(glGetUniformLocation(program, name), 1, GL_TRUE, value->data);
+}
+void shader_set_uniform_vec3(GLuint program, const char* name, const Vec3 value) {
+    glUniform3f(glGetUniformLocation(program, name), value.x, value.y, value.z);
+}
+void shader_set_uniform_vec4(GLuint program, const char* name, const Vec4 value) {
+    glUniform4f(glGetUniformLocation(program, name), value.x, value.y, value.z, value.w);
+}
