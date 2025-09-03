@@ -1,15 +1,16 @@
 #include <glad/glad.h>
 
 #include "camera.h"
+#include "components/components.h"
+#include "components/mesh.h"
+#include "components/model.h"
+#include "components/physics_body.h"
 #include "debug.h"
 #include "input.h"
 #include "math/matrix.h"
 #include "math/quaternion.h"
 #include "math/utils.h"
 #include "math/vec.h"
-#include "objects/model.h"
-#include "objects/physics_body.h"
-#include "pool.h"
 #include "shader.h"
 #include "utils.h"
 
@@ -25,22 +26,13 @@ static int lastx, lasty;
 
 float interp_factor = 0.5;
 
-#define GRAVITY 0.006f
-
 bool piloting = false;
-static long ship_idx;
-
-typedef struct {
-    PhysicsBody physics;
-    Model model;
-} Object;
+static long spaceship_idx;
 
 typedef struct {
     unsigned int grid_vao;
     GLFWwindow* window;
 } RenderCtx;
-
-static PoolAllocator objects;
 
 Mat4 camera_matrix(const Camera* cam) {
     Mat4 rot = quaternion_to_matrix(cam->actual_rotation);
@@ -110,8 +102,6 @@ static int init(GLFWwindow** out_window) {
 
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-    pool_init(&objects, 8192, sizeof(Object));
-
     init_input(window);
     return 0;
 }
@@ -145,58 +135,53 @@ draw_grid(GLuint program, GLuint vao, Mat4 proj_matrix, Mat4 view_matrix, const 
 
 static void init_objects(void) {
 
-    Object* ship = pool_alloc(&objects, &ship_idx);
-    ship->model = (Model) {
-        .transform =
-            {
-                        .scale = {.x = 1, .y = 3, .z = 1},
-                        .position = {.z = 30},
-                        .rotation = quaternion_unit(0, (Vec3) {.x = 1, .y = 0, .z = 0}),
-                        },
-        .mesh = generate_cubesphere(1, 2, (Vec3) {.y = 1}
-             ),
+    spaceship_idx = create_thing();
+    Transform spaceship_transform = {
+        .scale = {.x = 1, .y = 3, .z = 1},
+        .position = {.z = 30},
+        .rotation = quaternion_unit(0, (Vec3) {.x = 1, .y = 0, .z = 0}),
     };
-
-    ship->physics = (PhysicsBody) {
+    Mesh spaceship_mesh = generate_cubesphere(1, 2, (Vec3) {.y = 1});
+    PhysicsBody spaceship_physics = (PhysicsBody) {
         .mass = 100,
+        .velocity = {.x = 15, .y = 1},
+        .angular_velocity = {.x = 0.6, .y = 0.4}
     };
-    init_model_buffers(&ship->model);
-    physics_init_body(&ship->physics, &ship->model.mesh);
+    physics_init_body(&spaceship_physics, &spaceship_mesh);
+    OpenGLBuffers spaceship_buffers = {};
+    init_model_buffers(&spaceship_buffers, &spaceship_mesh);
 
-    Object* planet = pool_alloc(&objects, NULL);
-    planet->model = (Model) {
-        .mesh = generate_cubesphere(1, 30, (Vec3) {.y = 1}
-             ),
-        .transform =
-            {
-                                                   .scale = {.x = 10, .y = 10, .z = 10},
-                                                   .rotation = quaternion_unit(0, (Vec3) {.x = 1, .y = 0, .z = 0}),
-                                                   },
+    components_attach(spaceship_idx, COMPONENT_TRANSFORM, &spaceship_transform);
+    components_attach(spaceship_idx, COMPONENT_MESH, &spaceship_mesh);
+    components_attach(spaceship_idx, COMPONENT_PHYSICS, &spaceship_physics);
+    components_attach(spaceship_idx, COMPONENT_OPENGL, &spaceship_buffers);
+
+    long planet_idx = create_thing();
+    Transform planet_transform = {
+        .scale = {.x = 20, .y = 20, .z = 20},
+        .rotation = quaternion_unit(0, (Vec3) {.x = 1, .y = 0, .z = 0}),
     };
-    planet->physics = (PhysicsBody) {
+    Mesh planet_mesh = generate_cubesphere(1, 20, (Vec3) {.y = 1});
+    PhysicsBody planet_physics = (PhysicsBody) {
         .mass = 20000,
     };
-    init_model_buffers(&planet->model);
-    physics_init_body(&planet->physics, &planet->model.mesh);
-}
+    physics_init_body(&planet_physics, &planet_mesh);
+    OpenGLBuffers planet_buffers = {};
+    init_model_buffers(&planet_buffers, &planet_mesh);
 
-static void draw_object(void* obj_ptr, long idx, void* data) {
-    (void) idx;
-    Object* obj = obj_ptr;
-    GLuint program = *(GLuint*) data;
-
-    Mat4 model_matrix = transform_matrix(&obj->model.transform);
-
-    shader_set_uniform_mat4(program, "gModel", &model_matrix);
-
-    glBindVertexArray(obj->model.VAO);
-    glDrawElements(GL_TRIANGLES, obj->model.mesh.index_count, GL_UNSIGNED_INT, NULL);
-
+    components_attach(planet_idx, COMPONENT_TRANSFORM, &planet_transform);
+    components_attach(planet_idx, COMPONENT_MESH, &planet_mesh);
+    components_attach(planet_idx, COMPONENT_PHYSICS, &planet_physics);
+    components_attach(planet_idx, COMPONENT_OPENGL, &planet_buffers);
 }
 
 // TODO: Make shaders dynamic !
-static void use_gpu(const Camera* cam, RenderCtx* ctx, GLuint basic_program, GLuint grid_program, double deltatime) {
-    (void)deltatime;
+static void use_gpu(const Camera* cam,
+                    RenderCtx* ctx,
+                    GLuint basic_program,
+                    GLuint grid_program,
+                    double deltatime) {
+    (void) deltatime;
     glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -213,8 +198,9 @@ static void use_gpu(const Camera* cam, RenderCtx* ctx, GLuint basic_program, GLu
     shader_set_uniform_vec4(basic_program, "ambient_color", (Vec4) {0.0, 0.0, 0.0, 0.0});
 
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    pool_foreach(&objects, &draw_object, &basic_program);
+    components_render(deltatime, basic_program);
     // glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
 
     glDisable(GL_CULL_FACE);
     draw_grid(grid_program, ctx->grid_vao, proj_matrix, view_matrix, cam);
@@ -224,60 +210,14 @@ static void use_gpu(const Camera* cam, RenderCtx* ctx, GLuint basic_program, GLu
     glfwSwapBuffers(ctx->window);
 }
 
-typedef struct {
-    long source_idx;
-    Object* source;
-} GravityInfo;
-
-static void object_gravity(void* obj_ptr, long idx, void* data) {
-    Object* target = obj_ptr;
-    GravityInfo* info = data;
-
-    if (info->source_idx == idx)
-        return;
-
-    Vec3 force =
-        vec3_diff(info->source->model.transform.position, target->model.transform.position);
-    float sqr_distance = vec3_sqrlength(force);
-    force = vec3_normalize(force);
-    vec3_mult(&force, GRAVITY * (target->physics.mass + info->source->physics.mass) / sqr_distance);
-
-    physics_apply_force(&target->physics, force, VEC3_ZERO);
-}
-
-static void update_object_physics(void* obj_ptr, long idx, void* data) {
-    (void) data;
-    (void) idx;
-    Object* obj = obj_ptr;
-    double deltatime = *(double*)data;
-
-    /*
-    if (idx == 0) {
-        physics_apply_local_force(
-            &obj->physics, &obj->model.transform, (Vec3) {.y = 0.04}, (Vec3) {.y = -1});
-        physics_apply_local_force(
-            &obj->physics, &obj->model.transform, (Vec3) {.x = 0.0001}, (Vec3) {.y = 0.03});
-    }
-    */
-
-
-    GravityInfo info = {
-        .source = obj,
-        .source_idx = idx,
-    };
-    pool_foreach(&objects, &object_gravity, &info);
-
-    physics_update(&obj->physics, &obj->model.transform, deltatime);
-    debug_add_arrow(obj->model.transform.position, obj->physics.velocity);
-}
 
 static void update_camera(Camera* cam) {
 
     if (piloting) {
-        Object* obj = pool_get(&objects, ship_idx);
+        Transform* spaceship_transform = components_get(COMPONENT_TRANSFORM, spaceship_idx);
         Vec3 offset = {.y = -7, .z = 4};
-        Quaternion rotation = quaternion_inv(obj->model.transform.rotation);
-        Vec3 new_pos = vec3_add(obj->model.transform.position, quaternion_rotate(rotation, offset));
+        Quaternion rotation = quaternion_inv(spaceship_transform->rotation);
+        Vec3 new_pos = vec3_add(spaceship_transform->position, quaternion_rotate(rotation, offset));
         cam->position = new_pos;
         cam->rotation =
             quaternion_mult(rotation, quaternion_unit(deg_to_rad(-45), (Vec3) {.x = 1}));
@@ -324,7 +264,7 @@ void use_cpu(RenderCtx* render_ctx, Camera* cam, double deltatime) {
     physics_apply_force(&sphere_body, vec3_neg(force), VEC3_ZERO);
     */
 
-    pool_foreach(&objects, update_object_physics, &deltatime);
+    components_update(deltatime);
 
     update_camera(cam);
 }
@@ -358,6 +298,7 @@ int main(void) {
         .fov = 90,
     };
 
+    components_init();
     init_objects();
 
     double current_frame;
@@ -367,7 +308,7 @@ int main(void) {
         current_frame = glfwGetTime();
         double deltatime = current_frame - last_frame;
 
-        //debug_add_arrow(VEC3_ZERO, (Vec3) {.x = 38, .y = 6, .z = -3});
+        // debug_add_arrow(VEC3_ZERO, (Vec3) {.x = 38, .y = 6, .z = -3});
         use_cpu(&render_ctx, &cam, deltatime);
         use_gpu(&cam, &render_ctx, basic_program, grid_program, deltatime);
 
@@ -377,7 +318,7 @@ int main(void) {
 
     glDeleteProgram(basic_program);
 
-    pool_destroy(&objects);
+    components_cleanup();
 
     debug_cleanup();
 

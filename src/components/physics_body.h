@@ -1,11 +1,11 @@
 #ifndef ATTRACTOR_H
 #define ATTRACTOR_H
 
-#include "math/vec.h"
-#include "model.h"
+#include "components.h"
 #include <stdbool.h>
 
 typedef struct {
+    long entity_id;
     float mass;
     Vec3 velocity;
     Vec3 angular_velocity;
@@ -16,6 +16,7 @@ typedef struct {
     Mat3 inertia_inv;
     bool locked;
 } PhysicsBody;
+
 
 void physics_apply_force(PhysicsBody* body, Vec3 force, Vec3 global_offset);
 // Takes into account the rotation of the body

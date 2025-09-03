@@ -2,7 +2,6 @@
 #include "math/quaternion.h"
 #include "math/vec.h"
 #include "math/utils.h"
-#include <stdio.h>
 
 static double compute_inertia_product(Vec3 a, Vec3 b, Vec3 c, unsigned int i, unsigned int j) {
     double values[3][3] = {

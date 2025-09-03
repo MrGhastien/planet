@@ -9,11 +9,22 @@
   Step 2: Activer les bons propulseurs pour s'orienter et se déplacer vers une position.
  */
 
-typedef struct {
-    float reactor_thrust;
-    float manoeuvre_thrust;
-} ShipThrusters;
+#include "math/vec.h"
+#include "components/physics_body.h"
+#include "components/components.h"
 
-void ship_thrust(ShipThrusters* ship);
+typedef struct {
+    Vec3 thrust_position;
+    Vec3 thrust_force;
+} ShipThruster;    
+
+typedef struct {
+    long entity_id;
+    ShipThruster reactor;
+    ShipThruster* manoeuvre;
+    unsigned int manoeuvre_count;
+} Ship;
+
+void ship_thrust(PhysicsBody* physics, Transform* transform, Ship* ship, int index);
 
 #endif /* ! SHIP_H */

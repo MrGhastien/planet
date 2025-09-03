@@ -34,12 +34,12 @@
       "-g",
       "-DDEBUG",
       "-o",
-      "/home/mrghastien/dev/planet/src/objects/model.o",
-      "/home/mrghastien/dev/planet/src/objects/model.c"
+      "/home/mrghastien/dev/planet/src/debug.o",
+      "/home/mrghastien/dev/planet/src/debug.c"
     ],
     "directory": "/home/mrghastien/dev/planet",
-    "file": "/home/mrghastien/dev/planet/src/objects/model.c",
-    "output": "/home/mrghastien/dev/planet/src/objects/model.o"
+    "file": "/home/mrghastien/dev/planet/src/debug.c",
+    "output": "/home/mrghastien/dev/planet/src/debug.o"
   },
   {
     "arguments": [
@@ -55,33 +55,12 @@
       "-g",
       "-DDEBUG",
       "-o",
-      "/home/mrghastien/dev/planet/src/objects/physics_body.o",
-      "/home/mrghastien/dev/planet/src/objects/physics_body.c"
+      "/home/mrghastien/dev/planet/src/input.o",
+      "/home/mrghastien/dev/planet/src/input.c"
     ],
     "directory": "/home/mrghastien/dev/planet",
-    "file": "/home/mrghastien/dev/planet/src/objects/physics_body.c",
-    "output": "/home/mrghastien/dev/planet/src/objects/physics_body.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/gcc",
-      "-c",
-      "-I/home/mrghastien/dev/planet/src",
-      "-I/home/mrghastien/dev/planet/libs/glad/include",
-      "-Wall",
-      "-Wextra",
-      "-Wreturn-type",
-      "-Werror",
-      "-O0",
-      "-g",
-      "-DDEBUG",
-      "-o",
-      "/home/mrghastien/dev/planet/src/shader.o",
-      "/home/mrghastien/dev/planet/src/shader.c"
-    ],
-    "directory": "/home/mrghastien/dev/planet",
-    "file": "/home/mrghastien/dev/planet/src/shader.c",
-    "output": "/home/mrghastien/dev/planet/src/shader.o"
+    "file": "/home/mrghastien/dev/planet/src/input.c",
+    "output": "/home/mrghastien/dev/planet/src/input.o"
   },
   {
     "arguments": [
@@ -118,6 +97,27 @@
       "-g",
       "-DDEBUG",
       "-o",
+      "/home/mrghastien/dev/planet/src/math/quaternion.o",
+      "/home/mrghastien/dev/planet/src/math/quaternion.c"
+    ],
+    "directory": "/home/mrghastien/dev/planet",
+    "file": "/home/mrghastien/dev/planet/src/math/quaternion.c",
+    "output": "/home/mrghastien/dev/planet/src/math/quaternion.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-I/home/mrghastien/dev/planet/src",
+      "-I/home/mrghastien/dev/planet/libs/glad/include",
+      "-Wall",
+      "-Wextra",
+      "-Wreturn-type",
+      "-Werror",
+      "-O0",
+      "-g",
+      "-DDEBUG",
+      "-o",
       "/home/mrghastien/dev/planet/src/math/vec.o",
       "/home/mrghastien/dev/planet/src/math/vec.c"
     ],
@@ -139,12 +139,33 @@
       "-g",
       "-DDEBUG",
       "-o",
-      "/home/mrghastien/dev/planet/src/math/quaternion.o",
-      "/home/mrghastien/dev/planet/src/math/quaternion.c"
+      "/home/mrghastien/dev/planet/src/pool.o",
+      "/home/mrghastien/dev/planet/src/pool.c"
     ],
     "directory": "/home/mrghastien/dev/planet",
-    "file": "/home/mrghastien/dev/planet/src/math/quaternion.c",
-    "output": "/home/mrghastien/dev/planet/src/math/quaternion.o"
+    "file": "/home/mrghastien/dev/planet/src/pool.c",
+    "output": "/home/mrghastien/dev/planet/src/pool.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-I/home/mrghastien/dev/planet/src",
+      "-I/home/mrghastien/dev/planet/libs/glad/include",
+      "-Wall",
+      "-Wextra",
+      "-Wreturn-type",
+      "-Werror",
+      "-O0",
+      "-g",
+      "-DDEBUG",
+      "-o",
+      "/home/mrghastien/dev/planet/src/shader.o",
+      "/home/mrghastien/dev/planet/src/shader.c"
+    ],
+    "directory": "/home/mrghastien/dev/planet",
+    "file": "/home/mrghastien/dev/planet/src/shader.c",
+    "output": "/home/mrghastien/dev/planet/src/shader.o"
   },
   {
     "arguments": [
@@ -202,12 +223,12 @@
       "-g",
       "-DDEBUG",
       "-o",
-      "/home/mrghastien/dev/planet/src/debug.o",
-      "/home/mrghastien/dev/planet/src/debug.c"
+      "/home/mrghastien/dev/planet/src/components/ship.o",
+      "/home/mrghastien/dev/planet/src/components/ship.c"
     ],
     "directory": "/home/mrghastien/dev/planet",
-    "file": "/home/mrghastien/dev/planet/src/debug.c",
-    "output": "/home/mrghastien/dev/planet/src/debug.o"
+    "file": "/home/mrghastien/dev/planet/src/components/ship.c",
+    "output": "/home/mrghastien/dev/planet/src/components/ship.o"
   },
   {
     "arguments": [
@@ -223,12 +244,12 @@
       "-g",
       "-DDEBUG",
       "-o",
-      "/home/mrghastien/dev/planet/src/input.o",
-      "/home/mrghastien/dev/planet/src/input.c"
+      "/home/mrghastien/dev/planet/src/components/ecs.o",
+      "/home/mrghastien/dev/planet/src/components/ecs.c"
     ],
     "directory": "/home/mrghastien/dev/planet",
-    "file": "/home/mrghastien/dev/planet/src/input.c",
-    "output": "/home/mrghastien/dev/planet/src/input.o"
+    "file": "/home/mrghastien/dev/planet/src/components/ecs.c",
+    "output": "/home/mrghastien/dev/planet/src/components/ecs.o"
   },
   {
     "arguments": [
@@ -244,12 +265,33 @@
       "-g",
       "-DDEBUG",
       "-o",
-      "/home/mrghastien/dev/planet/src/pool.o",
-      "/home/mrghastien/dev/planet/src/pool.c"
+      "/home/mrghastien/dev/planet/src/components/model.o",
+      "/home/mrghastien/dev/planet/src/components/model.c"
     ],
     "directory": "/home/mrghastien/dev/planet",
-    "file": "/home/mrghastien/dev/planet/src/pool.c",
-    "output": "/home/mrghastien/dev/planet/src/pool.o"
+    "file": "/home/mrghastien/dev/planet/src/components/model.c",
+    "output": "/home/mrghastien/dev/planet/src/components/model.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-I/home/mrghastien/dev/planet/src",
+      "-I/home/mrghastien/dev/planet/libs/glad/include",
+      "-Wall",
+      "-Wextra",
+      "-Wreturn-type",
+      "-Werror",
+      "-O0",
+      "-g",
+      "-DDEBUG",
+      "-o",
+      "/home/mrghastien/dev/planet/src/components/physics_body.o",
+      "/home/mrghastien/dev/planet/src/components/physics_body.c"
+    ],
+    "directory": "/home/mrghastien/dev/planet",
+    "file": "/home/mrghastien/dev/planet/src/components/physics_body.c",
+    "output": "/home/mrghastien/dev/planet/src/components/physics_body.o"
   },
   {
     "arguments": [

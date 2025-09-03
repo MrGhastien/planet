@@ -1,7 +1,6 @@
 #include "math/vec.h"
-#include "mesh.h"
+#include "components/mesh.h"
 #include <math.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
